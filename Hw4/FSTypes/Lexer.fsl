@@ -1,0 +1,46 @@
+{
+(* Lexer specification for the type expression language 
+
+   To be completed with more rules
+*)
+
+
+module Lexer
+
+open Microsoft.FSharp.Text.Lexing
+open Parser
+
+let lexemeAsString lexbuf = 
+  LexBuffer<char>.LexemeString lexbuf
+
+
+
+let keyword s =
+	match s with
+	| _ -> TNAME s
+
+let helper s =
+	match s with
+	| _ -> TVAR s
+
+}
+
+let ident = ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '.']*
+
+
+let ident2 = [''']['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '.']*
+
+rule Token = parse
+  | [' ' '\t' '\r']   { Token lexbuf } 
+  | '\n'              { lexbuf.EndPos <- lexbuf.EndPos.NextLine; Token lexbuf }
+  | ident			  { keyword (lexemeAsString lexbuf) }
+  | ident2			  { helper( lexemeAsString lexbuf) }
+  | '('				  {LPAR}
+  | ')'				  {RPAR}
+  | "->"			  {ARROW}
+  | '*'				  {TIMES}
+  | ','				  {COMMA}
+  | eof             { EOF }
+  | _               { failwith "Lexer error: illegal symbol" }
+
+  

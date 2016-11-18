@@ -1,0 +1,31 @@
+{
+(* Lexer specification for the turtle language *)
+
+module Lexer
+
+open Microsoft.FSharp.Text.Lexing
+open Parser
+
+let lexemeAsString lexbuf = 
+  LexBuffer<char>.LexemeString lexbuf
+
+let keyword s =
+  match s with
+  | "repeat"  -> REP
+  | "forward" -> FORW
+  | "left"    -> LEFT
+  | "right"   -> RIGHT
+  | _         -> failwith "Lexer error: unrecognized command name"
+}
+
+rule Token = parse
+  | [' ' '\t' '\r']   { Token lexbuf } 
+  | '\n'              { lexbuf.EndPos <- lexbuf.EndPos.NextLine; Token lexbuf }
+  | ['0'-'9']+        { NUM (System.Int32.Parse (lexemeAsString lexbuf)) }
+  | ['a'-'z''A'-'Z']+ { keyword (lexemeAsString lexbuf) }
+  | ';'               { SEMICOL  } 
+  | '{'               { LBRACK  } 
+  | '}'               { RBRACK  } 
+  | eof               { EOF   }
+  | _                 { failwith "Lexer error: illegal symbol" }
+  

@@ -1,0 +1,49 @@
+%{
+ (* File Parser.FSy 
+    Parser for F# type expression sublanguage
+
+    To be completed
+  *)
+
+ open AST;
+%}
+
+%token ARROW
+%token TIMES
+%token <string> TVAR
+%token <string> TNAME
+%token LPAR
+%token RPAR
+%token COMMA
+%token EOF
+
+%left ARROW            /* lowest precedence  */
+%left TIMES
+%left LPAR RPAR
+
+%start Main
+%type <AST.typeExpr> Main 
+%type <AST.typeExpr> Expr 
+%type <AST.typeExpr list> SExpr
+
+%%
+
+
+Main:
+	Expr EOF { $1 }
+;
+
+SExpr:
+	Expr									{ [ $1 ] }
+	| Expr COMMA SExpr						{ [ $1 ] @ $3 }
+;
+
+Expr:
+	| TVAR									{ TVar $1 }
+	| TNAME									{ BasicT $1 }
+	| Expr TNAME							{ ParT( $2, [$1] ) }
+	| LPAR Expr COMMA SExpr RPAR TNAME		{ ParT($6, [ $2 ] @ $4) }
+	| Expr ARROW Expr						{ ArrowT( $1, $3) }
+	| Expr TIMES Expr						{ ProdT( $1, $3)}
+	| LPAR Expr RPAR						{ ( $2 ) }
+;

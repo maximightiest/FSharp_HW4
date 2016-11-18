@@ -1,0 +1,48 @@
+%{
+ (* File Parser.fsy 
+    Parser for Logo
+
+    To be completed with grammar rules
+  *)
+
+ open AST;
+%}
+
+%token <int> NUM
+
+%token FORW REP LEFT RIGHT
+%token SEMICOL
+%token LBRACK RBRACK 
+%token EOF
+
+%left SEMICOL
+
+%start Main
+%type <AST.command list> Main Block CommandSeq
+%type <AST.command> Command
+
+%%
+
+Main:
+	Block EOF				{ $1 }
+;
+
+Block:
+	  LBRACK CommandSeq RBRACK			{  $2  }
+	;
+
+CommandSeq:
+	  Command							{ [ $1 ] }
+	| CommandSeq SEMICOL CommandSeq		{  $1 @ $3  }
+	;
+	
+Command:
+	  FORW NUM							{Forward $2}
+	| REP NUM Block						{Repeat ($2, $3)}
+	| LEFT NUM							{Left $2}
+	| RIGHT NUM							{Right $2}	
+ ;
+
+
+
+
